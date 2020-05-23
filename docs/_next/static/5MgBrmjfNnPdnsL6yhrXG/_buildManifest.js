@@ -1,0 +1,1 @@
+self.__BUILD_MANIFEST = (function(a){return {"/":[a],"/dactylo":["static\u002Fchunks\u002F7f57cadb.0cd598aa47a94b247e82.js",a],"/index":[a]}}("static\u002Fchunks\u002F052b8610b6f3deefef9dcf2fffdc5515c4547e31.a5e77a6a1f277ae1aeb4.js"));self.__BUILD_MANIFEST_CB && self.__BUILD_MANIFEST_CB()
