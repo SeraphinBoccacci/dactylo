@@ -13,79 +13,35 @@ import {
 import Statistics from "../../components/statistics";
 
 import words from "../../constants/words";
+import { keysMap } from "../../constants/keys";
 
-interface lines {
+const numberOfLines = 3;
+const SPACE = " ";
+
+interface wordDetails {
   word: string;
   status: string;
   wordInfo: { letter: string; status: string }[];
 }
 
-const letters: string[] = [
-  "a",
-  "b",
-  "c",
-  "d",
-  "e",
-  "f",
-  "g",
-  "h",
-  "i",
-  "j",
-  "k",
-  "l",
-  "m",
-  "n",
-  "o",
-  "p",
-  "q",
-  "r",
-  "s",
-  "t",
-  "u",
-  "v",
-  "w",
-  "x",
-  "y",
-  "z",
-];
+interface dactyloState {
+  displayedWords: wordDetails[][];
+  currentWordId: number;
+  wordValue: string;
+  hint: string | undefined;
+  summary: {
+    okWords: number;
+    wrongWords: number;
+    okLetters: number;
+    wrongLetters: number;
+  };
+}
 
-const ex = new Map([
-  [["&", "a", "q", "w", "<", "ctrl", "maj", "fn"], "auriculaire gauche"],
-  [["z", "é", "s", "x"], "annulaire gauche"],
-  [["e", "d", "c"], "majeur gauche"],
-  [["(", "-", "r", "t", "f", "g", "c", "v"], "index gauche"],
-  [[" ", "alt"], "pouce gauche"],
-  [
-    ["Enter", "Backspace", "=", "$", "*", "^", "ù", "!", ")", "p", "m"],
-    "auriculaire droit",
-  ],
-  [["à", "o", "l"], "annulaire droit"],
-  [["ç", "i", "k", ","], "majeur droit"],
-  [["è", "_", "u", "y", "h", "j", "b", "n"], "index droit"],
-  [[" "], "pouce droit"],
-]);
-
-export default class Dactylo extends React.Component<
-  any,
-  {
-    displayedWords: lines[][];
-    currentWordId: number;
-    wordValue: string;
-    hint: string;
-    summary: {
-      okWords: number;
-      wrongWords: number;
-      okLetters: number;
-      wrongLetters: number;
-    };
-  }
-> {
+export default class Dactylo extends React.Component<any, dactyloState> {
   constructor(props: any) {
     super(props);
 
-    const numberOfLines = 3;
-
-    const displayedWords: lines[][] = [];
+    const displayedWords: wordDetails[][] = [];
 
     for (let i = 0; i < numberOfLines; i++) {
       displayedWords.push(fillLine());
@@ -109,79 +65,9 @@ export default class Dactylo extends React.Component<
     this.updateHint();
   }
 
-  handleKeyDown = (e: any) => {
-    if (!letters.includes(e.key) && e.key !== " " && e.key !== "Backspace") {
-      return;
-    }
-
-    const { displayedWords } = this.state;
-
-    if (e.key === " ") {
-      const updateChosenLine: lines[] = displayedWords[0].slice(
-        1,
-        displayedWords[0].length
-      );
-
-      let updatedChosenLines: lines[][] = [updateChosenLine].concat(
-        displayedWords.slice(1, 3)
-      );
-      if (!updateChosenLine.length) {
-        updatedChosenLines = displayedWords.slice(1, 3);
-
-        updatedChosenLines.push(fillLine());
-      }
-
-      this.setState({
-        displayedWords: updatedChosenLines,
-      });
-    } else if (e.key === "Backspace") {
-      const currentWord = displayedWords[0][0];
-
-      const previousLetterIndex: number =
-        currentWord.wordInfo.findIndex((letter) => letter.status === "NONE") -
-        1;
-
-      if (previousLetterIndex >= 0) {
-        displayedWords[0][0].wordInfo[previousLetterIndex].status = "NONE";
-      } else {
-        displayedWords[0][0].wordInfo[currentWord.wordInfo.length - 1].status =
-          "NONE";
-      }
-
-      this.setState({ displayedWords });
-    } else {
-      const currentWord = displayedWords[0][0];
-
-      const currentLetterIndex: number = currentWord.wordInfo.findIndex(
-        (letter) => letter.status === "NONE"
-      );
-
-      const updatedStatus: string =
-        currentWord.wordInfo[currentLetterIndex].letter === e.key
-          ? "OK"
-          : "WRONG";
-
-      displayedWords[0][0].wordInfo[currentLetterIndex].status = updatedStatus;
-
-      this.setState({ displayedWords });
-    }
-  };
-
-  handleChange = (e: any) => {
-    const nextValue = e.target.value;
-    const newValueLetters = nextValue.split("");
-    const newLetter = newValueLetters[newValueLetters.length - 1];
-
-    if (newLetter === " ") {
-      this.goNextWord();
-    } else {
-      this.updateLettersStatus(nextValue);
-    }
-  };
-
   updateLettersStatus = (newValue: string) => {
     const { displayedWords } = this.state;
-    const targetWord = displayedWords[0][0];
+    const [[targetWord]] = displayedWords;
     const newValueLetters = newValue.split("");
 
     const updatedWordInfo = targetWord.wordInfo.map((letter, letterIndex) => {
@@ -204,22 +90,20 @@ export default class Dactylo extends React.Component<
 
   goNextWord = () => {
     const { displayedWords } = this.state;
+    const [firstLine] = displayedWords;
+    const [firstWordOfFirstLine] = firstLine;
 
-    this.updateSummary(displayedWords[0][0]);
+    this.updateSummary(firstWordOfFirstLine);
 
-    const updateChosenLine: lines[] = displayedWords[0].slice(
-      1,
-      displayedWords[0].length
-    );
+    const updateFirstLine: wordDetails[] = firstLine.slice(1, firstLine.length);
 
-    let updatedDisplayedWords: lines[][] = [
-      updateChosenLine,
+    let updatedDisplayedWords: wordDetails[][] = [
+      updateFirstLine,
       ...displayedWords.slice(1, 3),
     ];
 
-    if (!updateChosenLine.length) {
+    if (!updateFirstLine.length) {
       updatedDisplayedWords = displayedWords.slice(1, 3);
-
       updatedDisplayedWords.push(fillLine());
     }
 
@@ -231,7 +115,7 @@ export default class Dactylo extends React.Component<
     this.updateHint(true);
   };
 
-  updateSummary = (doneWord: lines) => {
+  updateSummary = (doneWord: wordDetails) => {
     const isWordOk = doneWord.wordInfo.every(({ status }) => status === "OK");
     const wrongLetterCount = doneWord.wordInfo.reduce(
       (prevCount, { status }) => (status === "OK" ? prevCount : prevCount + 1),
@@ -251,7 +135,7 @@ export default class Dactylo extends React.Component<
 
   updateHint = (isNextWord?: boolean) => {
     const { displayedWords } = this.state;
-    const targetWord = displayedWords[0][0];
+    const [[targetWord]] = displayedWords;
     const nextLetter = targetWord.wordInfo.find(
       ({ status }) => status === "NONE"
     );
@@ -260,22 +144,25 @@ export default class Dactylo extends React.Component<
       const nextTargetWord = displayedWords[0][1] || displayedWords[1][0];
       const nextWordFirstLetter = nextTargetWord.wordInfo[0];
 
-      for (let [key, value] of ex) {
-        if (nextWordFirstLetter && key.includes(nextWordFirstLetter.letter)) {
-          this.setState({ hint: value });
-        }
-      }
+      this.setState({ hint: findInMap(nextWordFirstLetter?.letter) });
     } else {
       if (nextLetter) {
-        for (let [key, value] of ex) {
-          if (nextLetter && key.includes(nextLetter.letter))
-            this.setState({ hint: value });
-        }
+        this.setState({ hint: findInMap(nextLetter?.letter) });
       } else {
-        for (let [key, value] of ex) {
-          if (key.includes(" ")) this.setState({ hint: value });
-        }
+        this.setState({ hint: findInMap(SPACE) });
       }
+    }
+  };
+
+  handleChange = (e: any) => {
+    const newValue = e.target.value;
+    const newValueLetters = newValue.split("");
+    const newLetter = newValueLetters[newValueLetters.length - 1];
+
+    if (newLetter === SPACE) {
+      this.goNextWord();
+    } else {
+      this.updateLettersStatus(newValue);
     }
   };
 
@@ -290,7 +177,7 @@ export default class Dactylo extends React.Component<
           okLetters={summary.okLetters}
           wrongLetters={summary.wrongLetters}
         ></Statistics>
-        <DactyloTitle>Let's write !</DactyloTitle>
+        <DactyloTitle>Let's Train !</DactyloTitle>
         <DactyloTextContainer>
           {displayedWords.map((line, index) => (
             <DactyloLine key={index}>
@@ -308,6 +195,7 @@ export default class Dactylo extends React.Component<
         </DactyloTextContainer>
         <DactyloInput
           id="input"
+          placeholder="Train Here"
           value={wordValue}
           onChange={this.handleChange}
         ></DactyloInput>
@@ -319,7 +207,7 @@ export default class Dactylo extends React.Component<
 
 const fillLine = () => {
   const numberOfWords = 10;
-  const line: lines[] = [];
+  const line: wordDetails[] = [];
   for (let i = 0; i < numberOfWords; i++) {
     const randomIndex: number = Math.ceil(Math.random() * words.length);
 
@@ -333,4 +221,10 @@ const fillLine = () => {
   }
 
   return line;
+};
+
+const findInMap = (letter: string) => {
+  for (let [key, value] of keysMap) {
+    if (key.includes(letter)) return value;
+  }
 };

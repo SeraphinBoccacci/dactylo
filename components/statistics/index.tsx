@@ -1,7 +1,6 @@
 import React from "react";
 
-import { StatisticsContainer, StatisticsList } from "./style";
-import StatisticElement from "./statisticElement";
+import { StatisticsContainer, StatisticsTitle, StatisticsItem } from "./style";
 
 export default class Index extends React.Component<
   {
@@ -43,26 +42,19 @@ export default class Index extends React.Component<
       (okWords + wrongWords) / spentTimeInMinute;
 
     return (
-      <StatisticsContainer>
-        <StatisticsList>
-          <StatisticElement
-            name="Mots justes"
-            value={okWords}
-          ></StatisticElement>
-          <StatisticElement
-            name="Mots faux"
-            value={wrongWords}
-          ></StatisticElement>
-          <StatisticElement
-            name="Précision"
-            value={accuracy}
-          ></StatisticElement>
-
-          <StatisticElement
-            name="Mots par minutes"
-            value={Math.floor((wordsPerMinute || 0) * 100) / 100}
-          ></StatisticElement>
-        </StatisticsList>
+      <StatisticsContainer
+        title={<StatisticsTitle>Your Stats</StatisticsTitle>}
+        size="small"
+        bordered
+        column={1}
+        layout="horizontal"
+      >
+        <StatisticsItem label="Mots justes">{okWords}</StatisticsItem>
+        <StatisticsItem label="Mots faux">{wrongWords}</StatisticsItem>
+        <StatisticsItem label="Précision">{accuracy}</StatisticsItem>
+        <StatisticsItem label="Mots par minutes">
+          {Math.floor((wordsPerMinute || 0) * 100) / 100}
+        </StatisticsItem>
       </StatisticsContainer>
     );
   }

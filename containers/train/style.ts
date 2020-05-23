@@ -1,8 +1,10 @@
 import styled from "styled-components";
+import { colors } from "../../constants/style";
+import { Input } from "antd";
 
 export const DactyloContainer = styled.div`
   position: fixed;
-  background: #eee;
+  background: ${colors.white};
   top: 0;
   left: 0;
   width: 100vw;
@@ -19,8 +21,9 @@ export const DactyloTitle = styled.h1`
   margin-top: 5rem;
   text-align: center;
 
+  font-family: "Varela Round", sans-serif;
   font-size: 2.5rem;
-  color: #ababab;
+  color: ${colors.primary};
 `;
 
 export const DactyloTextContainer = styled.div`
@@ -37,7 +40,7 @@ export const DactyloLine = styled.p`
   text-align: center;
 `;
 
-export const DactyloInput = styled.input`
+export const DactyloInput = styled(Input)`
   position: relative;
   width: 180px;
   height: 40px;
@@ -45,16 +48,14 @@ export const DactyloInput = styled.input`
 
   margin-top: 200px;
   border: 1px #334455 solid;
-  border-radius: 5px;
-  background: #887799;
+  border-radius: 4px;
 
-  outline: none;
-
-  font-size: 1.5rem;
+  font-family: "Abel";
   text-align: center;
 `;
 
 export const DactyloWord = styled.span`
+  font-family: "Abel";
   display: inline-block;
   margin: 0 3px;
 `;
@@ -62,18 +63,19 @@ export const DactyloWord = styled.span`
 export const DactyloLetter = styled.span<{ status: string }>`
   background: ${(props) =>
     props.status === "OK"
-      ? "green"
+      ? colors.safe
       : props.status === "WRONG"
-      ? "red"
+      ? colors.danger
       : "none"};
 `;
 
 export const DactyloHint = styled.h3`
   margin-top: 6rem;
   font-size: 1.5rem;
+  font-family: "Abel";
 
   width: 400px;
   margin-left: calc(50% - 200px);
   text-align: center;
-  color: #988776;
+  color: ${colors.primary};
 `;
